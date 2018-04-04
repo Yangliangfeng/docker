@@ -1,3 +1,6 @@
+CentOS7的docker安装
+---------------------
+
 1. 安装一些基本依赖软件
 ```
 yum install -y yum-utils device-mapper-persistent-data lvm2
