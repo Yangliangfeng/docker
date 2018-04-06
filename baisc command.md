@@ -89,6 +89,65 @@ CMD /usr/sbin/init
   * 将主机上的 /home/shenyi/myweb目录中的映射到/var/www/html下，我们容器中操作该目录或在主机中操作，两者均是实时同步的
   * 访问网站的目录，其实就是访问/home/yang/myweb目录
 ```
+* 7.把JDK加入镜像
+ 
+ * 创建一个空文件夹，叫做build-jdk,然后把你的现成JDK文件拷贝到此目录,我们开始写Dockerfile
+ ```
+ FROM centos:httpd    #注意这里，我们使用前面做好的httpd的镜像
+COPY jdk1.8 /usr/local/jdk1.8.0_121   #把当前文件夹下的jdk文件拷贝到/usr/local/jdk1.8.0_121目录下
+ENV JAVA_HOME=/usr/local/jdk1.8.0_121   #加入环境变量
+ENV PATH $JAVA_HOME/bin:$PATH           
+ENV CLASSPATH .:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+CMD /usr/sbin/init    #容器启动后执行此命令
+```
+ * 生成镜像
+ ```
+ docker build -t centos:jdk   #生成标签为jdk的镜像
+ ```
+ * 启动容器
+```
+docker run --privileged -d -p 8080:80 --name  myjdk -v /home/shenyi/myweb:/var/www/html centos:jdk
+```
+* 进入容器
+```
+docker exec -it myjdk /bin/bash
+```
+* 8.docker配置远程连接
+
+  build是Docker守护进程运行的，不是CLI(客户端命令)，运行时会把整个的context（上下文）发送给Daemon守护进程
+  
+  两个重要概念:“Docker客户端和Docker守护进程
+  
+  Docker 服务端提供了一系列REST API（Docker Remote API),当我们敲入docker命令时实际上是通过API和Docker服务端进行交互的
+  
+  官网提供的三种连接方式:
+   * unix:///var/run/docker/sock（默认连接方式）
+   * tcp://host:port
+   * fd://socketfd
+   
+   查看连接方式的命令:
+   `
+    ps -ef | grep docker
+    `
+    
+    * 配置远程访问
+    
+ ```
+    sudo vi /usr/lib/systemd/system/docker.service 
+    ExecStart=/usr/bin/dockerd    #注释这一行
+    ExecStart=/usr/bin/dockerd -H tcp://0.0.0.0:2375 -H unix://var/run/docker.sock     #加入这一行
+    重启Docker:
+    systemctl daemon-reload
+    systemctl restart docker
+    查看结果:
+    ps -ef |grep docker
+```
+
+
+
+
+
+
 
 
 
