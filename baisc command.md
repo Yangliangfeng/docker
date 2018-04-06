@@ -130,7 +130,7 @@ docker exec -it myjdk /bin/bash
     ps -ef | grep docker
     `
     
-    * 配置远程访问
+   * 配置远程访问
     
  ```
     sudo vi /usr/lib/systemd/system/docker.service 
@@ -142,6 +142,66 @@ docker exec -it myjdk /bin/bash
     查看结果:
     ps -ef |grep docker
 ```
+# Docker管理工具portainer
+
+ * 拉取镜像
+ 
+ `
+ docker pull portainer/portainer
+`
+ * 运行容器
+ 
+ `
+ docker run -d -p 9000:9000 -v /var/run/docker.sock:/var/run/docker.sock -v /opt/portainer:/data --name mydocker portainer/portainer
+`
+ * 访问
+ 
+ `
+ http://192.168.1.30:9000
+ `
+ * 基于portainer的mysql安装
+   在通过portainer安装时，启动mysql出现了问题。要根据阿里云镜像源平台mysql官方的给出的docker启动的命令进行启动。
+   
+   `
+   docker run --name mysql -p 3307:3306 -e MYSQL_ROOT_PASSWORD=123 -d mysql
+  `
+  
+# 关于docker的几个案例 
+  
+### 1.手工搭建Centos+Nginx容器、commit提交、容器主机文件互拷
+  
+ * 搭建nginx 镜像
+  
+```
+  docker run -it --privileged --name tmp centos /usr/sbin/init      #创建临时容器，此时，界面处于停止状态，重新打开终端
+  docker exec -it tmp /bin/bash      #进入容器
+  rpm -Uvh http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm
+  yum install nginx -y    #下载并安装nginx
+  systemctl enable nginx   #设置开机启动
+  systemctl start nginx    #启动nginx
+```
+  
+ * 提交修改好的镜像并产生新的镜像
+  `
+  docker commit -c 'CMD ["/usr/sbin/init"] ' -c "EXPOSE 80" tmp centos:nginx
+  `
+  
+ * 拷贝一份配置文件
+  
+  `
+  docker cp tmp:/etc/nginx/nginx.conf /home/yang/nginx/conf/
+  `
+  
+ * 启动nginx镜像
+  
+  `
+  docker run --name mynginx --privileged -p 9090:80 -v /home/yang/nginx/conf/nginx.conf:/etc/nginx/nginx.conf -d centos:nginx
+  `
+ 
+
+   
+ 
+
 
 
 
