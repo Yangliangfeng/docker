@@ -197,6 +197,200 @@ docker exec -it myjdk /bin/bash
   `
   docker run --name mynginx --privileged -p 9090:80 -v /home/yang/nginx/conf/nginx.conf:/etc/nginx/nginx.conf -d centos:nginx
   `
+  
+  ### 2.Docker Compose入门：启动多个web容器
+  
+  准备工作:创建两个文件夹分别是web1、web2，里面分别新建index.html，并写入不同的内容
+  
+  * 安装
+  
+  ```
+  sudo curl -L https://github.com/docker/compose/releases/download/1.18.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose       #在/usr/local/bin/下出现 docker-compose目录
+  sudo chmod +x /usr/local/bin/docker-compose      #赋予权限
+  docker-compose --version      #查看版本
+  ```
+  
+  * 配置文件 docker-compose.yml
+  
+  ```
+  1.创建一个空文件夹，composetest
+  2.创建一个docker-compose.yml 文件
+  3.写入如下内容
+  services: 
+  web1: 
+    container_name: web1
+    image:"centos:jdk"
+    ports: 
+      - "8080:80"
+    privileged: true
+    volumes: 
+      - "/home/shenyi/nginx/web1/:/var/www/html/"
+  web2: 
+    container_name: web2
+    image: "centos:jdk"
+    ports: 
+      - "8081:80"
+    privileged: true
+    volumes: 
+      - "/home/shenyi/nginx/web2/:/var/www/html/"
+version: "3"
+   4.相关yaml检查的在线工具 检查语法
+   http://www.yamllint.com/
+```
+* 创建并启动
+ 
+ `
+ docker-compose up -d
+`
+### 3.Docker network入门、简配容器网络、容器间互相访问
+
+ * 创建网络并设置子网地址
+ 
+ ```
+ docker-compose stop    #停止运行的容器
+ docker network create -d bridge --subnet=192.128.0.0/16 mynginx  #创建网络并设置子网地址
+ docker network ls      #查看创建的网络
+ docker network inspect mynginx     #查看创建的mynginx网络配置
+ ```
+ 
+ * 修改docker-compose的配置文件
+ 
+ ```
+services:
+  web1:
+    container_name: web1
+    image: "centos:jdk"
+    ports:
+      - "8080:80"
+    privileged: true
+    volumes:
+      - "/home/yang/nginx/web1/:/var/www/html/"
+    networks:
+      - "mynginx-net"
+  web2:
+    container_name: web2
+    image: "centos:jdk"
+    ports:
+      - "8081:80"
+    privileged: true
+    volumes:
+      - "/home/yang/nginx/web2/:/var/www/html/"
+    networks:
+      - "mynginx-net"
+  nginx:
+    container_name: mynginx
+    image: "centos:nginx"
+    ports:
+      - "9000:80"
+    privileged: true
+    volumes:
+      - "/home/yang/nginx/conf/nginx.conf:/etc/nginx/nginx.conf"
+    networks:
+      - "mynginx-net"
+networks:
+  mynginx-net:
+    external:
+      name: "mynginx"
+version: "3"
+```
+ * 启动容器
+ 
+ `
+ docker-compose start
+ `
+ 
+ * 进入容器查看
+ 
+ ```
+ cat /etc/hosts         #查看网络配置
+ ```
+ 
+ ### 4.Docker compose创建网络、指定容器IP、启动简单nginx负载均衡
+ 
+  * 自动创建网络
+```
+  docker-compose stop      #停止运行的容器
+  docker rm +ID            #删除之前创建的容器
+  编辑配置文件:
+services:
+  web1:
+    container_name: web1
+    image: "centos:jdk"
+    ports:
+      - "8080:80"
+    privileged: true
+    volumes:
+      - "/home/yang/nginx/web1/:/var/www/html/"
+    networks:
+      app_net:
+       ipv4_address: ${web1_addr}
+  web2:
+    container_name: web2
+    image: "centos:jdk"
+    ports:
+      - "8081:80"
+    privileged: true
+    volumes:
+      - "/home/yang/nginx/web2/:/var/www/html/"
+    networks:
+      app_net:
+       ipv4_address: 192.158.0.6
+  nginx:
+    container_name: mynginx
+    image: "centos:nginx"
+    ports:
+      - "9000:80"
+    privileged: true
+    volumes:
+      - "/home/yang/nginx/conf/nginx.conf:/etc/nginx/nginx.conf"
+    networks:
+      app_net:
+       ipv4_address: 192.158.0.3
+networks:
+  app_net:
+    driver: bridge
+    ipam:
+     config:
+      - subnet: 192.158.0.0/16
+version: "3"
+```
+ * 创建并启动
+ 
+```
+ docker-compose up -d   
+```
+ * 环境变量
+```
+ https://docs.docker.com/compose/environment-variables/#the-env-file    #参考此文档
+ 在.yml的配置目录下，新建“.env”文件，在文件中写入需要替换的变量的值，在.yml文件，用${变量名}进行替换
+ ```
+ * nginx的负载均衡的基本配置
+ 
+ ```
+ upstream mydocker {
+             server 192.156.0.6;
+             server 192.156.0.3;
+         }
+      server {
+        listen       80;
+        server_name  mydocker;
+        location / {
+             proxy_set_header Host $host;
+             proxy_set_header X-Real-IP $remote_addr;
+             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+             proxy_buffering off;
+             proxy_pass http://mydocker;     
+        }
+     }
+```
+
+
+ 
+ 
+
+ 
+
+
  
 
    
