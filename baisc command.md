@@ -384,11 +384,30 @@ version: "3"
      }
 ```
 
+ ### 5.利用Docker-Machine创建虚拟Docker主机、创建私有镜像仓库、在虚拟主机中启动nginx容器
+ 
+ * 安装
+ ```
+  1.直接拷贝
+  base=https://github.com/docker/machine/releases/download/v0.14.0 &&
+  curl -L $base/docker-machine-$(uname -s)-$(uname -m) >/tmp/docker-machine &&
+  sudo install /tmp/docker-machine /usr/local/bin/docker-machine
+  2.直接下载（比较快）
+  https://github.com/docker/machine/releases
+  mv docker-machine-Linux-x86_64 /usr/local/bin/docker-machine
+  chomd +x /usr/local/bin/docker-machine
+```
 
- 
- 
-
- 
+* 安装virtualbox 
+ ```
+  1.https://www.virtualbox.org/wiki/Linux_Downloads   #直接下载
+   VirtualBox-5.2-5.2.4_119785_el7-1.x86_64.rpm
+  2.yum install VirtualBox-5.2-5.2.4_119785_el7-1.x86_64.rpm
+  3.关闭虚拟机，设置设备里面的处理器选项中的虚拟机Inter VT
+  4.检查/home/yang/.docker/machine/cache 是否存在，没有则创建文件夹
+  ```
+  
+  * 
 
 
  
