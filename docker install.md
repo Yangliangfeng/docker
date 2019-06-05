@@ -42,7 +42,7 @@ sudo usermod -aG docker +"登陆的普通用户名"  并重新登陆
 ```
 sudo tee /etc/docker/daemon.json <<-'EOF'   #利用tee 命令把下面的配置写入 daemon.json
 {
-  "registry-mirrors": ["https://xxxx.mirror.aliyuncs.com"]  #这里要改成自己阿里云镜像加速器的地址
+  "registry-mirrors": ["https://14lbe7a4.mirror.aliyuncs.com"]  #这里要改成自己阿里云镜像加速器的地址
 }
 EOF
 ```
