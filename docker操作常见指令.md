@@ -48,4 +48,7 @@ docker-compose -p php up -d
 
 5.取别名停止容器
 docker-compose -p php stop
+
+6.删除所有的容器
+docker-compose rm
 ```
