@@ -73,6 +73,19 @@ docker ps -a    #列出所有运行中的容器
 docker start + ID  #启动ID的镜像
 docker stop + ID   #停止ID的镜像
 ```
+12. 启动nginx+php环境
+```
+1.创建网络
+docker network create --driver=bridge --subnet=192.138.0.0/16 mynginx 
+
+2.先要启动fpm
+docker run -d --rm --name fpm --network mynginx --ip 192.138.0.2 \
+-v /home/yang/php:/php php:7.3-fpm-alpine3.9 
+
+3.再启动nginx
+docker run -d --rm --name nginx --network mynginx -v /home/yang/php:/usr/share/nginx/html 
+-v /home/yang/conf/nginx.conf:/etc/nginx/nginx.conf -p 80:80 nginx:1.16.0-alpine
+```
 
 
 
