@@ -31,3 +31,21 @@ docker rmi $(docker images -q)
 
 * 复制容器的文件
 docker cp myweb:/usr/local/apache2/conf/httpd.conf /home/shenyi/conf/
+
+* docker-compose编排命令
+```
+1. 启动容器
+docker-compose up -d
+
+2.停止所有容器
+docker-compose stop
+
+3.停止其中某个容器
+docker-compose stop xxx
+
+4.取别名启动容器
+docker-compose -p php up -d
+
+5.取别名停止容器
+docker-compose -p php stop
+```
