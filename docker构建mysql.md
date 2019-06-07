@@ -120,3 +120,38 @@ docker run -it --name bakup --rm \
 -e mysql_user=shenyi \
 mytool:1.2
 ```
+* 构建自动备份数据的容器
+```
+1. 编辑数据库备份的脚本bakup.sh
+#!/bin/sh
+if [ ! -d "/data" ]; then
+  mkdir /data
+fi
+mysqldump -h$mysql_host  -u$mysql_user -p$mysql_pass $mysql_db > /data/$mysql_db-$(date +%Y%m%d_%H%M%S).sql
+
+2. 构建数据库自动备份的Dockerfile
+FROM mytool:1.1
+ENV mysql_user root
+ENV mysql_pass 123456
+ENV mysql_host  192.168.222.135
+ENV mysql_db test
+COPY ./bakup.sh /
+RUN chmod +x bakup.sh
+ENV cron_conf  "*       *       *       *       *  "
+RUN echo "$cron_conf /bakup.sh" >>  /var/spool/cron/crontabs/root  //定时任务计划
+ENTRYPOINT ["crond","-f"] //crond 以f的方式运行
+
+3. 构建新镜像
+docker build -t mysqlbackup:1.0 .
+
+4. 运行备份数据库的容器
+
+docker run -d --name bakup  \
+-v /home/yang/mysqlbak:/data \
+-e mysql_pass=123123 \
+-e mysql_host=192.168.222.1 \
+-e mysql_db=yang \
+-e mysql_user=yang \
+mysqlbakup:1.0
+
+```
