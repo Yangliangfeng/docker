@@ -68,3 +68,18 @@ docker exec -it mysql mysql -uroot -p123456
 3. 导入数据
 source /tmp/test.sql
 ```
+* 加入镜像源的MySQL客户端的运行
+```
+1. 构建镜像
+默认镜像源可能比较慢，常用的有：
+中科大镜像源：http://mirrors.ustc.edu.cn/alpine/
+阿里云镜像源：http://mirrors.aliyun.com/alpine/
+
+2. 利用Dockerfil修改镜像源
+FROM alpine:latest
+RUN echo http://mirrors.ustc.edu.cn/alpine/v3.7/main > /etc/apk/repositories
+RUN echo http://mirrors.ustc.edu.cn/alpine/v3.7/community >> /etc/apk/repositories
+RUN apk update && apk upgrade
+RUN apk add  mysql-client
+ENTRYPOINT ["mysql"]
+```
