@@ -49,7 +49,7 @@ init_connect='SET NAMES utf8mb4'
 #最大连接数
 max_connections = 300
 
-7. 启动mysql容器
+7. 启动mysql服务器容器
 docker run --name mysql --rm \
  -v /home/shenyi/mysql/conf:/etc/mysql/conf.d \
 -v /home/shenyi/mysql/data:/var/lib/mysql \
