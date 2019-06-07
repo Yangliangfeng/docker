@@ -70,7 +70,7 @@ source /tmp/test.sql
 ```
 * 加入镜像源的MySQL客户端的运行
 ```
-1. 构建镜像
+1. 常用的镜像
 默认镜像源可能比较慢，常用的有：
 中科大镜像源：http://mirrors.ustc.edu.cn/alpine/
 阿里云镜像源：http://mirrors.aliyun.com/alpine/
@@ -82,4 +82,10 @@ RUN echo http://mirrors.ustc.edu.cn/alpine/v3.9/community >> /etc/apk/repositori
 RUN apk update && apk upgrade
 RUN apk add  mysql-client
 ENTRYPOINT ["mysql"]
+
+3. 利用Dockerfile文件构建镜像
+docker build -t mytool:1.0 /home/yang/mydocker/Dockerfile
+
+4. 用自建的镜像以交互的方式运行mysql客户端
+docker run -it --name tmp --rm mytool:1.0 -h 182.92.225.115 -uroot -p123456
 ```
