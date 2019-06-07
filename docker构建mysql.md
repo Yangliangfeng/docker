@@ -76,9 +76,9 @@ source /tmp/test.sql
 阿里云镜像源：http://mirrors.aliyun.com/alpine/
 
 2. 利用Dockerfil修改镜像源
-FROM alpine:latest
-RUN echo http://mirrors.ustc.edu.cn/alpine/v3.7/main > /etc/apk/repositories
-RUN echo http://mirrors.ustc.edu.cn/alpine/v3.7/community >> /etc/apk/repositories
+FROM alpine:3.9
+RUN echo http://mirrors.ustc.edu.cn/alpine/v3.9/main > /etc/apk/repositories
+RUN echo http://mirrors.ustc.edu.cn/alpine/v3.9/community >> /etc/apk/repositories
 RUN apk update && apk upgrade
 RUN apk add  mysql-client
 ENTRYPOINT ["mysql"]
