@@ -88,4 +88,35 @@ docker build -t mytool:1.0 /home/yang/mydocker/Dockerfile
 
 4. 用自建的镜像以交互的方式运行mysql客户端
 docker run -it --name tmp --rm mytool:1.0 -h 182.92.225.115 -uroot -p123456
+
+5. msyql常用的备份命令
+mysqldump -h182.92.225.115 -uroot -p123456 test > test.sql  //备份主机182.92.225.115 上test数据库
+
+6. mytool:1.1 版本Dockerfile
+FROM mytool:1.0
+RUN mkdir data
+ENTRYPOINT mysqldump -h192.168.222.135 -uroot -p123456 test > /data/test.sql
+
+7. 构造mytool:1.1版本的镜像
+docker build -t mytool:1.1 /home/yang/mydocker/Dockerfile
+
+8. mytool:1.2 版本的Dockerfile
+FROM mytool:1.1
+ENV mysql_user root
+ENV mysql_pass 123456
+ENV mysql_host  192.168.222.135
+ENV mysql_db test
+ENTRYPOINT mysqldump -h$mysql_host  -u$mysql_user -p$mysql_pass $mysql_db > /data/$mysql_db.sql
+
+9. 构建mytool:1.2镜像
+docker build -t mytool:1.2
+
+10. 运行备份的文件
+docker run -it --name bakup --rm \
+-v /home/shenyi/mysqlbak:/data \
+-e mysql_pass=123123 \
+-e mysql_host=192.168.222.1 \
+-e mysql_db=shenyi \
+-e mysql_user=shenyi \
+mytool:1.2
 ```
