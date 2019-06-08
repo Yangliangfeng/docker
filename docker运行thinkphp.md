@@ -189,6 +189,23 @@ docker-compose stop fpm
 docker-compose rm fpm
 docker-compose up -d fpm
 
+```
+* 解决容器内tp上传文件没有权限的问题
+```
+1. 添加权限
+本机的代码目录挂载到容器中比如/php目录下，用户和用户组是本机的，而容器中运行的php的默认用户却跟本机的不一致。
+容器中运行php的默认用户是www-data，因此，要把www-data用户和用户组的ID必须保持一致。
+usermod -u 1000 www-data
+groupmod -g 1000 www-data  //但是，usermod在容器中默认不存在
+
+2. 安装usermod
+apk update && apk upgrade
+apk add shadow
+执行 usermod和groupmod命令
+
+3. 重启fpm容器
+docker-compose restart fpm
+
 
 ```
 
