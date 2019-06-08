@@ -26,3 +26,6 @@ docker run -it -p 139:139 -p 445:445  --name smb -d --rm  \
  -g "guest account= yang" 
 
 ```
+* 在window下运行
+
+在window搜索文件夹下输入:“\\182.92.225.115”即可
