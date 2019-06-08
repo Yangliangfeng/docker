@@ -1,0 +1,142 @@
+### docker中运行thinkphp
+
+* 网站目录
+
+/home/yang/html/web      //存放代码的目录
+
+/home/yang/html/compose  //存放docker-compose文件目录
+
+* docker-compose文件
+```
+version: "3"
+services:
+  fpm:
+   image: php:7.3-fpm-alpine3.9
+   container_name: fpm
+   volumes:
+      - /home/yang/html/web:/php
+   networks:
+      mywebnet:
+       ipv4_address: 192.138.0.2
+  httpd:
+   image: httpd:2.4-alpine
+   container_name: httpd
+   ports:
+      - 8081:80
+   volumes:
+      - /home/yang/html/web/public:/usr/local/apache2/htdocs/
+      - /home/yang/conf/httpd.conf:/usr/local/apache2/conf/httpd.conf
+   networks:
+      mywebnet:
+       ipv4_address: 192.138.0.3
+networks:
+  mywebnet:
+     driver: bridge
+     ipam:
+       config:
+         - subnet: 192.138.0.0/16
+
+```
+* url重写
+```
+1. 开启apache重写模块
+LoadModule rewrite_module modules/mod_rewrite.so
+
+2. 在网站配置相关节点加入  
+<VirtualHost *:80>
+    ServerAdmin shenyi@com.cn
+    DocumentRoot "/usr/local/apache2/htdocs"
+    ServerName localhost
+    <Directory "/usr/local/apache2/htdocs">
+     Options None
+     AllowOverride all
+     Require all granted
+    </Directory>
+    ProxyRequests Off
+    ProxyPassMatch ^/(.*\.php) fcgi://192.168.0.2:9000/php/public/$1
+</VirtualHost>
+
+3. 重新构建容器
+docker-compose restart
+```
+* 在容器中配置mysql
+```
+1. mysql加入docker-compose配置文件中
+mysql:
+   image: mysql:5.7
+   container_name: mysqld
+   ports:
+     - 3306:3306
+   volumes:
+     - /home/yang/mysql/conf:/etc/mysql/conf.d
+     - /home/shenyi/mysql/data:/var/lib/mysql
+   environment:
+     - MYSQL_ROOT_PASSWORD=123456
+   networks:
+     - mywebne
+2. 启动mysql
+docker-compose up -d mysql
+
+3. 获取容器中的mysql的IP地址
+docker network inspect compose_mywebnet
+
+4.配置tp框架中的数据库配置文件
+```
+* 在容器中安装php核心扩展
+```
+1. 登入容器查看php配置模块
+docker exec -it fpm sh
+
+2. 查看当前容器的镜像源
+cat /etc/apk/repositories
+
+3. 查看当前 alpine的版本
+cat /etc/issue
+
+4. 设置阿里云的镜像源
+echo http://mirrors.ustc.edu.cn/alpine/v3.9/main > /etc/apk/repositories && \
+echo http://mirrors.ustc.edu.cn/alpine/v3.9/community >> /etc/apk/repositories
+
+5. 镜像源的更新
+apk update && apk upgrade
+
+6. 安装php扩展
+docker-php-ext-install pdo_mysql
+
+7. 重启fpm
+docker-compose restart fpm
+
+注释：刚才是在容器中单独安装扩展；如果容器删除了，下次重新启动新的容器，还是没有新安装的扩展
+
+8. 在Dockerfile中配置扩展
+在docker-compose.yml的配置文件目录下，新建build文件夹，在build文件夹下，新建名为phpfpm的Dockerfile文件
+FROM php:7.2.0-fpm-alpine3.6
+RUN echo http://mirrors.ustc.edu.cn/alpine/v3.6/main > /etc/apk/repositories && \
+    echo http://mirrors.ustc.edu.cn/alpine/v3.6/community >> /etc/apk/repositories
+RUN apk update && apk upgrade
+RUN docker-php-ext-install pdo_mysql
+
+9. 在docker-compose.yml配置文件中加入build
+fpm:
+   build:
+    context: ./build
+    dockerfile: phpfpm
+
+   image: php:7.2.0-fpm-alpine3.6
+   container_name: fpm
+   volumes:
+      - /home/yang/html/web:/php
+   networks:
+
+10. 生成新的php:fpm镜像
+docker-compose build fpm
+
+11. 删除并重新启动fpm容器
+docker-compose stop fpm
+
+docker-compose rm fpm
+
+docker-compose up -d fpm
+
+```
+
