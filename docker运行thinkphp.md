@@ -139,4 +139,56 @@ docker-compose rm fpm
 docker-compose up -d fpm
 
 ```
+* php安装redis扩展以及安装redis容器
+```
+1. 拉取基于apline的redis
+docker pull redis:apline
+
+2. redis配置文件
+下载url：https://redis.io/topics/config 
+在网站的目录下新建conf文件夹，进入conf目录：
+wget https://raw.githubusercontent.com/antirez/redis/4.0/redis.conf
+修改如下：
+bind 0.0.0.0
+dir /data
+
+3. 在docker-compose.yml中加入redis服务
+redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+     - 6379:6379
+    volumes:
+     - /home/yang/html/conf/redis.conf:/usr/local/etc/redis/redis.conf
+     - /home/yang/html/redisdata:/data
+    networks:
+      mywebnet:
+       ipv4_address: 192.138.0.10
+
+4. 启动redis服务器
+docker-compose up -d redis
+
+5. fpm安装redis扩展
+在build目录中创建phpredis的Dockerfile
+FROM php:7.2.0-fpm-alpine3.6
+RUN apk add autoconf gcc g++ make
+RUN pecl install redis-4.0.1 \
+    && docker-php-ext-enable redis
+
+6. 在docker-compose.yml配置文件加入扩展
+fpm:
+   build:
+    context: ./build
+    dockerfile: phpredis
+
+7. 生成新的fpm镜像
+docker-compose build fpm
+
+8. 删除并重新启动 fpm容器
+docker-compose stop fpm
+docker-compose rm fpm
+docker-compose up -d fpm
+
+
+```
 
