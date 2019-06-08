@@ -4,6 +4,7 @@
 https://hub.docker.com/r/dperson/samba/
 
 * 开放端口
+```
 sudo iptables -I INPUT -p tcp --dport 139 -j ACCEPT
 
 sudo iptables -I INPUT -p tcp --dport 445 -j ACCEPT
@@ -11,6 +12,7 @@ sudo iptables -I INPUT -p tcp --dport 445 -j ACCEPT
 sudo iptables -I INPUT -p udp --dport 137 -j ACCEPT
 
 sudo iptables -I INPUT -p udp --dport 138 -j ACCEPT
+```
 
 * 运行容器
 ```
