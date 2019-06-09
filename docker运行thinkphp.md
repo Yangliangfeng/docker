@@ -205,7 +205,40 @@ apk add shadow
 
 3. 重启fpm容器
 docker-compose restart fpm
-
-
+```
+* 完整的doceker-compose的配置文件
+```
+version: "3"
+services:
+  fpm:
+   image: php:7.3-fpm-alpine3.9
+   container_name: fpm
+   volumes:
+    - /home/yang/php:/php
+   networks:
+      mywebnet:
+       ipv4_address: 192.168.0.2
+    healthcheck:(健康检查)
+      test: ["CMD", "curl", "-s", "-f", "http://localhost:80"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+  httpd:
+   image: httpd:2.4-alpine
+   container_name: httpd
+   volumes:
+    - /home/yang/php:/usr/local/apache2/htdocs/
+    - /home/yang/conf/httpd.conf:/usr/local/apache2/conf/httpd.conf
+   ports:
+    - 80:80
+   networks:
+      mywebnet:
+       ipv4_address: 192.168.0.4
+networks:
+  mywebnet:
+   driver: bridge
+   ipam:
+    config:
+     - subnet: 192.168.0.0/16
 ```
 
