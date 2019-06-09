@@ -1,0 +1,55 @@
+version: "3"
+services:
+  fpm:
+   build:
+     context: ./build
+     dockerfile: phpredis
+   image: php:7.3-fpm-alpine3.9
+   container_name: fpm
+   volumes:
+      - /home/yang/html/web:/php
+   networks:
+      mywebnet:
+       ipv4_address: 192.168.0.2
+  httpd:
+   image: httpd:2.4-alpine
+   container_name: httpd
+   ports:
+      - 8080:80
+   volumes:
+      - /home/yang/html/web/public:/usr/local/apache2/htdocs/
+      - /home/yang/conf/httpd.conf:/usr/local/apache2/conf/httpd.conf
+   networks:
+      mywebnet:
+       ipv4_address: 192.168.0.3
+  mysql:
+    image: mysql:5.7
+    container_name: mysqld
+    ports:
+      - 3306:3306
+    volumes:
+      - /home/yang/mysql/conf:/etc/mysql/conf.d
+      - /home/yang/mysql/data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+    networks:
+      - mywebnet
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+     - 6379:6379
+    volumes:
+     - /home/yang/html/conf/redis.conf:/usr/local/etc/redis/redis.conf
+     - /home/yang/html/redisdata:/data
+    networks:
+      mywebnet:
+       ipv4_address: 192.168.0.10
+
+networks:
+  mywebnet:
+     driver: bridge
+     ipam:
+       config:
+         - subnet: 192.168.0.0/16
+
