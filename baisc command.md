@@ -396,18 +396,30 @@ version: "3"
   https://github.com/docker/machine/releases
   mv docker-machine-Linux-x86_64 /usr/local/bin/docker-machine
   chomd +x /usr/local/bin/docker-machine
+  
 ```
 
 * 安装virtualbox 
+
  ```
   1.https://www.virtualbox.org/wiki/Linux_Downloads   #直接下载
    VirtualBox-5.2-5.2.4_119785_el7-1.x86_64.rpm
   2.yum install VirtualBox-5.2-5.2.4_119785_el7-1.x86_64.rpm
   3.关闭虚拟机，设置设备里面的处理器选项中的虚拟机Inter VT
   4.检查/home/yang/.docker/machine/cache 是否存在，没有则创建文件夹
-  ```
   
-  * 
+  ```
+  * docker本地镜像上传到远程私有库
+  ```
+  1. 登陆远程的docker账号
+  docker login
+  
+  2. 本地的镜像打标签
+  docker tag centos:jdk yptps/yptps_web:web     //yptps/yptps_web是注册的仓库
+  
+  3. 推送到远程仓库
+  docker push yptps/yptps_web:web
+  ```
 
 
  
