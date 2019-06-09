@@ -206,39 +206,27 @@ apk add shadow
 3. 重启fpm容器
 docker-compose restart fpm
 ```
-* 完整的doceker-compose的配置文件
+* docker的健康检查
 ```
-version: "3"
-services:
-  fpm:
-   image: php:7.3-fpm-alpine3.9
-   container_name: fpm
-   volumes:
-    - /home/yang/php:/php
-   networks:
-      mywebnet:
-       ipv4_address: 192.168.0.2
-    healthcheck:(健康检查)
-      test: ["CMD", "curl", "-s", "-f", "http://localhost:80"]
-      interval: 5s
-      timeout: 5s
-      retries: 3
-  httpd:
-   image: httpd:2.4-alpine
-   container_name: httpd
-   volumes:
-    - /home/yang/php:/usr/local/apache2/htdocs/
-    - /home/yang/conf/httpd.conf:/usr/local/apache2/conf/httpd.conf
-   ports:
-    - 80:80
-   networks:
-      mywebnet:
-       ipv4_address: 192.168.0.4
-networks:
-  mywebnet:
-   driver: bridge
-   ipam:
-    config:
-     - subnet: 192.168.0.0/16
+1. 健康检查的docker-compose配置文件
+healthcheck:(健康检查)
+  test: ["CMD", "curl", "-s", "-f", "http://localhost:80"] //-f fail表示出现的故障   -s slient 表示在当前的cmd不是输出
+  interval: 5s
+  timeout: 5s
+  retries: 3
+ 
+ 2. 命令行下的健康检查
+--health-cmd:检查的命令
+--health-interval：两次健康检查的间隔
+--health-timeout：健康检查命令运行超时时间，超过代表失败
+--health-retries：当连续失败指定次数后，则将容器状态视为 unhealthy
+--health-start-period:容器启动的初始化时间，此时健康检查失效不会计入次数
+
+我们把命令改一下：
+docker run  --name web1 -d -p 8080:80 --privileged -v /home/shenyi/nginx/web1/:/var/www/html/ \
+--health-cmd="curl --silent --fail http://localhost:80/ || exit 1" --health-interval=3s --health-retries=3 \
+--health-timeout=5s \
+ centos:jdk
+
 ```
 
