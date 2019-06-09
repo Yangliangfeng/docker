@@ -51,4 +51,7 @@ docker-compose -p php stop
 
 6.删除所有的容器
 docker-compose rm
+
+7. 检查某个容器的状态
+docker inspect web(web是容器名)
 ```
