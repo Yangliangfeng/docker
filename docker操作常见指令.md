@@ -55,3 +55,11 @@ docker-compose rm
 7. 检查某个容器的状态
 docker inspect web(web是容器名)
 ```
+* 以文件形式存储镜像以及安装
+```
+1. 以为渐渐形式保存镜像
+docker save -o centos-nginx-image.tar centos:nginx
+
+2. 安装文件形式的镜像
+docker load -i centos-nginx-image.tar
+```
