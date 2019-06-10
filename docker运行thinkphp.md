@@ -210,7 +210,8 @@ docker-compose restart fpm
 ```
 1. 健康检查的docker-compose配置文件
 healthcheck:(健康检查)
-  test: ["CMD", "curl", "-s", "-f", "http://localhost:80"] //-f fail表示出现的故障   -s slient 表示在当前的cmd不是输出
+  test: ["CMD", "curl", "-s", "-f", "http://localhost:80"] //-f fail表示出现的故障   -s slient 表示在当
+  前的cmd不是输出
   interval: 5s
   timeout: 5s
   retries: 3
@@ -228,5 +229,30 @@ docker run  --name web1 -d -p 8080:80 --privileged -v /home/shenyi/nginx/web1/:/
 --health-timeout=5s \
  centos:jdk
 
+```
+* php 安装swoole扩展
+```
+1. 通过pecl安装swoole扩展
+    1) 在build目录中创建phpswoole的Dockerfile
+      FROM php:7.3-fpm-alpine3.9
+      RUN apk add m4 autoconf make gcc g++ linux-headers
+      RUN pecl install swoole-4.3.4  
+      RUN docker-php-ext-enable swoole
+     2) 在docker-compose.yml配置文件加入扩展
+        fpm:
+           build:
+            context: ./build
+            dockerfile: phpredis
+
+      3) 生成新的fpm镜像
+         docker-compose build fpm
+2. 通过源代码包安装
+    FROM php:7.3-fpm-alpine3.9
+    RUN apk add m4 autoconf make gcc g++
+    RUN apk add linux-headers
+    ADD ./install/swoole-4.3.4.tgz /tmp/
+    RUN cd /tmp/swoole-4.3.4 && phpize && ./configure && make && make install
+    RUN docker-php-ext-enable swoole
+    其他步骤如上
 ```
 
