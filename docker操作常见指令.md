@@ -63,3 +63,7 @@ docker save -o centos-nginx-image.tar centos:nginx
 2. 解压文件形式的镜像
 docker load -i centos-nginx-image.tar
 ```
+* 在docker里面安装procps（ps -ef 时显示父进程，子进程pid）
+```
+apk add procps
+```
