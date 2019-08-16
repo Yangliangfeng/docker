@@ -86,6 +86,10 @@ docker run -d --rm --name fpm --network mynginx --ip 192.138.0.2 \
 docker run -d --rm --name nginx --network mynginx -v /home/yang/php:/usr/share/nginx/html 
 -v /home/yang/conf/nginx.conf:/etc/nginx/nginx.conf -p 80:80 nginx:1.16.0-alpine
 ```
+13. docker可视化监控插件
+```
+https://github.com/google/cadvisor
+```
 
 
 
