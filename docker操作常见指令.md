@@ -67,3 +67,7 @@ docker load -i centos-nginx-image.tar
 ```
 apk add procps
 ```
+* 在docker里面安装perl
+```
+ apk add --no-cache perl
+```
